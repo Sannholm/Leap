@@ -165,7 +165,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 3
   jumpSpeed: 10
-  gravity: -9.82
+  onGroundMargin: 0.2
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!1 &7397550380109460208
 GameObject:
   m_ObjectHideFlags: 0
