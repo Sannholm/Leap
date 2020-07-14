@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -12,7 +13,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private CapsuleCollider coll;
 
-    private float currSpeed;
+    private Func<float, Vector2> currMovementFunction;
+    private float movementFunctionTime;
+    private Vector2 movementFunctionStartPos;
 
     private ISet<Platform> visitedPlatforms = new HashSet<Platform>();
 
@@ -20,8 +23,6 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         coll = GetComponent<CapsuleCollider>();
-        
-        currSpeed = movementSpeed;
     }
 
     void OnJump()
@@ -29,21 +30,41 @@ public class PlayerController : MonoBehaviour
         Platform platform = GetOnPlatform();
         if (platform != null)
         {
-            rb.AddForce(Vector3.up * platform.GetJumpVelocity().y, ForceMode.VelocityChange);
-            currSpeed = platform.GetJumpVelocity().x;
+            StartMovementFunction(platform.GetJumpFunction());
         }
     }
 
     void FixedUpdate()
     {
-        rb.velocity = new Vector3(currSpeed, rb.velocity.y, 0);
-        //rb.MovePosition(rb.position + Vector3.right * currSpeed * Time.fixedDeltaTime);
+        if (currMovementFunction == null)
+        {
+            rb.velocity = new Vector3(movementSpeed, rb.velocity.y, 0);
+        }
+        else
+        {
+            Vector2 offset = currMovementFunction(movementFunctionTime);
+            rb.MovePosition(movementFunctionStartPos + offset);
+            rb.velocity = (currMovementFunction(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
+            movementFunctionTime += Time.fixedDeltaTime;
+        }
+    }
+
+    private void StartMovementFunction(Func<float, Vector2> f)
+    {
+        currMovementFunction = f;
+        movementFunctionTime = 0;
+        movementFunctionStartPos = rb.position;
+    }
+
+    private void StopMovementFunction()
+    {
+        currMovementFunction = null;
     }
 
     private Platform GetOnPlatform()
     {
         Vector3 center = coll.bounds.center + Vector3.down * (coll.height/2 - coll.radius + onGroundMargin);
-        Collider[] colliders = Physics.OverlapSphere(center, coll.radius, groundLayerMask, QueryTriggerInteraction.Ignore);
+        Collider[] colliders = Physics.OverlapBox(center, Vector3.one*coll.radius, Quaternion.identity, groundLayerMask, QueryTriggerInteraction.Ignore);
         Platform foundPlatform = null;
         foreach (var collider in colliders)
         {
@@ -57,12 +78,19 @@ public class PlayerController : MonoBehaviour
         return foundPlatform;
     }
 
-    void OnTriggerStay(Collider collider) {
+    void OnTriggerStay(Collider collider)
+    {
         Platform platform = collider.gameObject.GetComponentInParent<Platform>();
         if (platform != null && rb.velocity.y <= 0 && platform.isAbovePlatform(coll.bounds.min.y) && !visitedPlatforms.Contains(platform)) {
             visitedPlatforms.Add(platform);
             platform.OnPlayerLand();
-            currSpeed = movementSpeed;
+            Debug.Log("Land");
         }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Coll");
+        StopMovementFunction();
     }
 }

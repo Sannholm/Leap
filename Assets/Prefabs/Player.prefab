@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7397550379769240234}
   - component: {fileID: 1547651253020730936}
+  - component: {fileID: 7946167746385827182}
   - component: {fileID: 6121696069377305232}
   - component: {fileID: 9037599209518554174}
   - component: {fileID: 7437449123760212144}
@@ -42,12 +43,25 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7397550379769240229}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: dcaba625b77fc5442a78775ed82c50a8, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &7946167746385827182
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7397550379769240229}
+  m_Material: {fileID: 13400000, guid: dcaba625b77fc5442a78775ed82c50a8, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &6121696069377305232
 Rigidbody:
@@ -64,7 +78,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 120
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!114 &9037599209518554174
 MonoBehaviour:
   m_ObjectHideFlags: 0
