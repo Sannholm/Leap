@@ -10,9 +10,9 @@ public class LevelGenerator
         int numPlatforms = 1000;
         float startAvgLength = 10, endAvgLength = 3;
         float lengthVariation = 2;
-        float minSpacing = 2, maxSpacing = 20;
+        float minSpacing = 5, maxSpacing = 20;
         float minOffsetY = -10, maxOffsetY = 10;
-        float jumpHeightRatio = 0.5f;
+        float jumpHeightRatio = 0.25f;
         float jumpTimePerDistance = 0.1f;
 
         IList<PlatformInfo> platforms = new List<PlatformInfo>(numPlatforms + 1);
@@ -39,6 +39,8 @@ public class LevelGenerator
         {
             Vector2 jumpStart = platforms[i].GetEndPoint() + Vector2.left*0.2f;
             Vector2 jumpEnd = platforms[i + 1].GetStartPoint() + Vector2.right*0.2f;
+            platforms[i].jumpPoint = jumpStart;
+            platforms[i + 1].landPoint = jumpEnd;
 
             float dx = jumpEnd.x - jumpStart.x;
             float dy = jumpEnd.y - jumpStart.y;
@@ -48,10 +50,29 @@ public class LevelGenerator
             float a = (dy - 2*(h + Mathf.Sqrt(h*(-dy + h))))/(jt*jt);
             float b = (2*(h + Mathf.Sqrt(h*(-dy + h))))/jt;
             float vx = dx/jt;
-            platforms[i].jumpFunction = t => new Vector2(vx*t, (a*t+b)*t);
+            platforms[i].jumpFunction = new MovementFunc(t => new Vector2(vx*t, (a*t+b)*t), jt);
         }
 
         return platforms;
+    }
+
+    public MovementFunc GenerateGuidePath(IList<PlatformInfo> platforms)
+    {
+        float runSpeed = 4.9f;
+
+        IList<MovementFunc> segments = new List<MovementFunc>(platforms.Count * 2);
+
+        foreach (var platform in platforms)
+        {
+            Vector2 runFrom = platform.GetLandPoint(), runTo = platform.GetJumpPoint();
+            float runDuration = Vector2.Distance(runFrom, runTo) / runSpeed;
+            segments.Add(new MovementFunc(t => Vector2.Lerp(runFrom, runTo, t / runDuration), runDuration));
+
+            MovementFunc jf = platform.GetJumpFunction();
+            segments.Add(new MovementFunc(t => runTo + jf.f(t), jf.duration));
+        }
+
+        return MovementFunc.combine(segments);
     }
 }
 
@@ -59,22 +80,29 @@ public class PlatformInfo
 {
     private Vector2 startPoint;
     private Vector2 endPoint;
-    public Func<float, Vector2> jumpFunction;
+
+    public Vector2 landPoint;
+    public Vector2 jumpPoint;
+    public MovementFunc jumpFunction;
 
     public static PlatformInfo FromEndpoints(Vector2 startPoint, Vector2 endPoint)
     {
-        PlatformInfo platform = new PlatformInfo();
-        platform.startPoint = startPoint;
-        platform.endPoint = endPoint;
-        return platform;
+        PlatformInfo p = new PlatformInfo();
+        p.startPoint = startPoint;
+        p.endPoint = endPoint;
+        p.landPoint = p.startPoint;
+        p.jumpPoint = p.endPoint;
+        return p;
     }
 
     public static PlatformInfo FromLength(Vector2 start, float length)
     {
-        PlatformInfo platform = new PlatformInfo();
-        platform.startPoint = start;
-        platform.endPoint = start + Vector2.right * length;
-        return platform;
+        PlatformInfo p = new PlatformInfo();
+        p.startPoint = start;
+        p.endPoint = start + Vector2.right * length;
+        p.landPoint = p.startPoint;
+        p.jumpPoint = p.endPoint;
+        return p;
     }
 
     public Vector2 GetStartPoint()
@@ -92,7 +120,17 @@ public class PlatformInfo
         return Vector2.Distance(startPoint, endPoint);
     }
 
-    public Func<float, Vector2> GetJumpFunction()
+    public Vector2 GetLandPoint()
+    {
+        return landPoint;
+    }
+
+    public Vector2 GetJumpPoint()
+    {
+        return jumpPoint;
+    }
+
+    public MovementFunc GetJumpFunction()
     {
         return jumpFunction;
     }

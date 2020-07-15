@@ -13,13 +13,13 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private CapsuleCollider coll;
 
-    private Func<float, Vector2> currMovementFunction;
+    private MovementFunc? currMovementFunction;
     private float movementFunctionTime;
     private Vector2 movementFunctionStartPos;
 
     private ISet<Platform> visitedPlatforms = new HashSet<Platform>();
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
         coll = GetComponent<CapsuleCollider>();
@@ -36,20 +36,21 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (currMovementFunction == null)
+        if (!currMovementFunction.HasValue)
         {
             rb.velocity = new Vector3(movementSpeed, rb.velocity.y, 0);
         }
         else
         {
-            Vector2 offset = currMovementFunction(movementFunctionTime);
+            Func<float, Vector2> f = currMovementFunction.Value.f;
+            Vector2 offset = f(movementFunctionTime);
             rb.MovePosition(movementFunctionStartPos + offset);
-            rb.velocity = (currMovementFunction(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
+            rb.velocity = (f(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
             movementFunctionTime += Time.fixedDeltaTime;
         }
     }
 
-    private void StartMovementFunction(Func<float, Vector2> f)
+    private void StartMovementFunction(MovementFunc f)
     {
         currMovementFunction = f;
         movementFunctionTime = 0;
@@ -90,7 +91,6 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Coll");
         StopMovementFunction();
     }
 }

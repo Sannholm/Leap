@@ -7,18 +7,22 @@ public class GameController : MonoBehaviour
 {
     public GameObject generatedLevelRoot;
     public GameObject platformPrefab;
+    public GameObject guideCharacter;
 
     private IList<PlatformInfo> platforms;
+    private MovementFunc guidePath;
 
     void Start()
     {
         ConstructLevel();
+        guideCharacter.GetComponent<FollowPath>().Follow(guidePath, 3);
     }
 
     private void ConstructLevel()
     {
         LevelGenerator levelGen = new LevelGenerator();
-        platforms = levelGen.GeneratePlatforms(PlatformInfo.FromLength(Vector2.zero, 10), new System.Random());
+        platforms = levelGen.GeneratePlatforms(PlatformInfo.FromLength(Vector2.zero, 20), new System.Random());
+        guidePath = levelGen.GenerateGuidePath(platforms);
         PlacePlatforms(platforms);
     }
 

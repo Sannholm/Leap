@@ -10,19 +10,13 @@ public class Platform : MonoBehaviour
 
     private PlatformInfo platform;
 
-    void Start()
+    void Awake()
     {
-        //visualPart.SetActive(false);
-    }
-
-    void Update()
-    {
-        
+        visualPart.SetActive(false);
     }
 
     public void OnPlayerLand() {
         visualPart.SetActive(true);
-        //coll.enabled = true;
     }
 
     public bool isAbovePlatform(float y) {
@@ -36,7 +30,7 @@ public class Platform : MonoBehaviour
         transform.localScale = new Vector3(platform.GetLength(), 1, 1);
     }
 
-    public Func<float, Vector2> GetJumpFunction()
+    public MovementFunc GetJumpFunction()
     {
         return platform.GetJumpFunction();
     }
