@@ -2,16 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class LevelGenerator
 {
     public IList<PlatformInfo> GeneratePlatforms(PlatformInfo startPlatform, System.Random rand)
     {
+        // Platform
         int numPlatforms = 1000;
-        float startAvgLength = 10, endAvgLength = 3;
+        float startAvgLength = 5, endAvgLength = 3;
         float lengthVariation = 2;
         float minSpacing = 5, maxSpacing = 20;
-        float minOffsetY = -10, maxOffsetY = 10;
+        float minOffsetY = -20, maxOffsetY = 20;
+
+        // Jump Points
+        float minEarlyLandMargin = 0.01f, maxEarlyLandMargin = 0.1f;
+        float minLateJumpMargin = 0.01f, maxLateJumpMargin = 0.5f;
+
+        Assert.IsTrue(maxEarlyLandMargin + maxLateJumpMargin <= 1, "Early landing and late jump margin overlapping");
+
+        // Jump Arc
         float jumpHeightRatio = 0.25f;
         float jumpTimePerDistance = 0.1f;
 
@@ -35,12 +45,21 @@ public class LevelGenerator
             platforms.Add(PlatformInfo.FromLength(new Vector2(x, y), length));
         }
 
+        for (int i = 0; i < platforms.Count; i++)
+        {
+            PlatformInfo p = platforms[i];
+
+            float earlyLandMargin = Mathf.Lerp(minEarlyLandMargin, maxEarlyLandMargin, (float)rand.NextDouble());
+            float lateJumpMargin = Mathf.Lerp(minLateJumpMargin, maxLateJumpMargin, (float)rand.NextDouble());
+            
+            p.landPoint = Vector2.Lerp(p.GetStartPoint(), p.GetEndPoint(), earlyLandMargin);
+            p.jumpPoint = Vector2.Lerp(p.GetStartPoint(), p.GetEndPoint(), 1 - lateJumpMargin);
+        }
+
         for (int i = 0; i < platforms.Count - 1; i++)
         {
-            Vector2 jumpStart = platforms[i].GetEndPoint() + Vector2.left*0.2f;
-            Vector2 jumpEnd = platforms[i + 1].GetStartPoint() + Vector2.right*0.2f;
-            platforms[i].jumpPoint = jumpStart;
-            platforms[i + 1].landPoint = jumpEnd;
+            Vector2 jumpStart = platforms[i].jumpPoint;
+            Vector2 jumpEnd = platforms[i + 1].landPoint;
 
             float dx = jumpEnd.x - jumpStart.x;
             float dy = jumpEnd.y - jumpStart.y;

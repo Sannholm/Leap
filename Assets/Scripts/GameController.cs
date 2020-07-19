@@ -14,8 +14,10 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        //Time.timeScale = 0.1f;
+
         ConstructLevel();
-        guideCharacter.GetComponent<FollowPath>().Follow(guidePath, 3);
+        guideCharacter.GetComponent<GuideController>().Follow(guidePath, 3);
     }
 
     private void ConstructLevel()

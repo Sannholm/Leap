@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public float jumpSpeed = 10f;
     public float onGroundMargin = 0.2f;
     public LayerMask groundLayerMask;
+    public RunningCharacterController character;
 
     private Rigidbody rb;
     private CapsuleCollider coll;
@@ -30,7 +31,9 @@ public class PlayerController : MonoBehaviour
         Platform platform = GetOnPlatform();
         if (platform != null)
         {
-            StartMovementFunction(platform.GetJumpFunction());
+            MovementFunc jf = platform.GetJumpFunction();
+            StartMovementFunction(jf);
+            character.Jump(jf.duration);
         }
     }
 
