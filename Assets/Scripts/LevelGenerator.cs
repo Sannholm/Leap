@@ -77,7 +77,7 @@ public class LevelGenerator
 
     public MovementFunc GenerateGuidePath(IList<PlatformInfo> platforms)
     {
-        float runSpeed = 4.9f;
+        float runSpeed = 6.9f;
 
         IList<MovementFunc> segments = new List<MovementFunc>(platforms.Count * 2);
 

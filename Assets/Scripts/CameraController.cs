@@ -6,6 +6,7 @@ public class CameraController : MonoBehaviour
 {
     public GameObject followedPlayer;
     public Vector3 offset;
+    public float minPosX = 0;
     public float smoothTime;
     
     private Vector3 followVelocity;
@@ -18,7 +19,7 @@ public class CameraController : MonoBehaviour
     private Vector3 getTargetPos()
     {
         Vector3 targetPos = followedPlayer.transform.position + offset;
-        targetPos = new Vector3(Mathf.Max(0, targetPos.x), targetPos.y, targetPos.z);
+        targetPos = new Vector3(Mathf.Max(minPosX, targetPos.x), targetPos.y, targetPos.z);
         return targetPos;
     }
 
