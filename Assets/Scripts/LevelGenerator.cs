@@ -10,14 +10,15 @@ public class LevelGenerator
     {
         // Platform
         int numPlatforms = 1000;
-        float startAvgLength = 5, endAvgLength = 3;
+        float startAvgLength = 7, endAvgLength = 3;
         float lengthVariation = 2;
         float minSpacing = 5, maxSpacing = 20;
-        float minOffsetY = -20, maxOffsetY = 20;
+        float minOffsetY = -10, maxOffsetY = 10;
+        float minTiltAngle = 0, maxTiltAngle = 0;
 
         // Jump Points
-        float minEarlyLandMargin = 0.01f, maxEarlyLandMargin = 0.1f;
-        float minLateJumpMargin = 0.01f, maxLateJumpMargin = 0.5f;
+        float minEarlyLandMargin = 0f, maxEarlyLandMargin = 0.1f;
+        float minLateJumpMargin = 0.05f, maxLateJumpMargin = 0.8f;
 
         Assert.IsTrue(maxEarlyLandMargin + maxLateJumpMargin <= 1, "Early landing and late jump margin overlapping");
 
@@ -38,11 +39,14 @@ public class LevelGenerator
 
             float offsetY = Mathf.Lerp(minOffsetY, maxOffsetY, (float)rand.NextDouble());
             float y = prevPlatformEndpoint.y + offsetY;
+            float tiltAngle = Mathf.Lerp(minTiltAngle, maxTiltAngle, (float)rand.NextDouble());
 
             float avgLength = Mathf.Lerp(startAvgLength, endAvgLength, progress);
-            float length = avgLength + (float)(rand.NextDouble() * 2 - 1) * lengthVariation;
+            float length = avgLength + Mathf.Lerp(-lengthVariation, lengthVariation, (float)rand.NextDouble());
 
-            platforms.Add(PlatformInfo.FromLength(new Vector2(x, y), length));
+            Vector2 start = new Vector2(x, y);
+            Vector2 end = start + (Vector2)(Quaternion.Euler(0, 0, tiltAngle) * new Vector2(length, 0));
+            platforms.Add(PlatformInfo.FromEndpoints(start, end));
         }
 
         for (int i = 0; i < platforms.Count; i++)
@@ -75,10 +79,8 @@ public class LevelGenerator
         return platforms;
     }
 
-    public MovementFunc GenerateGuidePath(IList<PlatformInfo> platforms)
+    public MovementFunc GenerateGuidePath(IList<PlatformInfo> platforms, float runSpeed)
     {
-        float runSpeed = 6.9f;
-
         IList<MovementFunc> segments = new List<MovementFunc>(platforms.Count * 2);
 
         foreach (var platform in platforms)

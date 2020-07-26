@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public Camera mainCamera;
+    public RenderTexture lightMaskRT;
     public GameObject followedPlayer;
+    public GameObject guidePlayer;
     public Vector3 offset;
     public float minPosX = 0;
     public float smoothTime;
@@ -16,9 +19,22 @@ public class CameraController : MonoBehaviour
         transform.position = getTargetPos();
     }
 
+    void Update()
+    {
+        if (lightMaskRT.width != mainCamera.pixelWidth || lightMaskRT.height != mainCamera.pixelHeight)
+        {
+            if (lightMaskRT.IsCreated())
+            {
+                lightMaskRT.Release();
+            }
+            lightMaskRT.width = mainCamera.pixelWidth;
+            lightMaskRT.height = mainCamera.pixelHeight;
+        }
+    }
+
     private Vector3 getTargetPos()
     {
-        Vector3 targetPos = followedPlayer.transform.position + offset;
+        Vector3 targetPos = (followedPlayer.transform.position + guidePlayer.transform.position) * 0.5f + offset;
         targetPos = new Vector3(Mathf.Max(minPosX, targetPos.x), targetPos.y, targetPos.z);
         return targetPos;
     }

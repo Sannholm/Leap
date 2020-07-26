@@ -6,10 +6,12 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float movementSpeed = 3f;
-    public float jumpSpeed = 10f;
     public float onGroundMargin = 0.2f;
     public LayerMask groundLayerMask;
     public RunningCharacterController character;
+
+    public AudioSource jumpAudioSource;
+    public RandomAudioClipScheduler landAudioPlayer;
 
     private Rigidbody rb;
     private CapsuleCollider coll;
@@ -19,6 +21,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 movementFunctionStartPos;
 
     private ISet<Platform> visitedPlatforms = new HashSet<Platform>();
+
+    private bool hasFailed = false;
 
     void Awake()
     {
@@ -34,22 +38,26 @@ public class PlayerController : MonoBehaviour
             MovementFunc jf = platform.GetJumpFunction();
             StartMovementFunction(jf);
             character.Jump(jf.duration);
+            jumpAudioSource.Play();
         }
     }
 
     void FixedUpdate()
     {
-        if (!currMovementFunction.HasValue)
+        if (!hasFailed)
         {
-            rb.velocity = new Vector3(movementSpeed, rb.velocity.y, 0);
-        }
-        else
-        {
-            Func<float, Vector2> f = currMovementFunction.Value.f;
-            Vector2 offset = f(movementFunctionTime);
-            rb.MovePosition(movementFunctionStartPos + offset);
-            rb.velocity = (f(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
-            movementFunctionTime += Time.fixedDeltaTime;
+            if (!currMovementFunction.HasValue)
+            {
+                rb.velocity = new Vector3(movementSpeed, rb.velocity.y, 0);
+            }
+            else
+            {
+                Func<float, Vector2> f = currMovementFunction.Value.f;
+                Vector2 offset = f(movementFunctionTime);
+                rb.MovePosition(movementFunctionStartPos + offset);
+                rb.velocity = (f(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
+                movementFunctionTime += Time.fixedDeltaTime;
+            }
         }
     }
 
@@ -87,13 +95,26 @@ public class PlayerController : MonoBehaviour
         Platform platform = collider.gameObject.GetComponentInParent<Platform>();
         if (platform != null && rb.velocity.y <= 0 && platform.isAbovePlatform(coll.bounds.min.y) && !visitedPlatforms.Contains(platform)) {
             visitedPlatforms.Add(platform);
-            platform.OnPlayerLand();
-            Debug.Log("Land");
+            platform.Activate();
+            Debug.Log("Arrive at platform");
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("Coll");
+
         StopMovementFunction();
+
+        if (GetOnPlatform() == null)
+        {
+            hasFailed = true;
+            Debug.Log("Failed");
+        }
+        else
+        {
+            landAudioPlayer.PlayNext();
+            Debug.Log("Land");
+        }
     }
 }
