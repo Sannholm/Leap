@@ -4,79 +4,104 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+public class LevelGeneratorParams
+{
+    public float levelDuration;
+    public float runSpeed;
+
+    // Platform
+    public float startAvgLength, endAvgLength;
+    public float lengthVariation;
+    public float minSpacing, maxSpacing;
+    public float minOffsetY, maxOffsetY;
+    public float minTiltAngle, maxTiltAngle;
+
+    // Jump Points
+    public float minEarlyLandMargin, maxEarlyLandMargin;
+    public float minLateJumpMargin, maxLateJumpMargin;
+
+    // Jump Arc
+    public float jumpHeightRatio;
+    public float jumpTimePerDistance;
+}
+
 public class LevelGenerator
 {
-    public IList<PlatformInfo> GeneratePlatforms(PlatformInfo startPlatform, System.Random rand)
+    public IList<PlatformInfo> GeneratePlatforms(System.Random rand, PlatformInfo startPlatform, LevelGeneratorParams p)
     {
-        // Platform
-        int numPlatforms = 1000;
-        float startAvgLength = 7, endAvgLength = 3;
-        float lengthVariation = 2;
-        float minSpacing = 5, maxSpacing = 20;
-        float minOffsetY = -10, maxOffsetY = 10;
-        float minTiltAngle = 0, maxTiltAngle = 0;
+        Assert.IsTrue(p.maxEarlyLandMargin + p.maxLateJumpMargin <= 1, "Early landing and late jump margin overlapping");
 
-        // Jump Points
-        float minEarlyLandMargin = 0f, maxEarlyLandMargin = 0.1f;
-        float minLateJumpMargin = 0.05f, maxLateJumpMargin = 0.8f;
+        IList<PlatformInfo> platforms = new List<PlatformInfo>();
 
-        Assert.IsTrue(maxEarlyLandMargin + maxLateJumpMargin <= 1, "Early landing and late jump margin overlapping");
-
-        // Jump Arc
-        float jumpHeightRatio = 0.25f;
-        float jumpTimePerDistance = 0.1f;
-
-        IList<PlatformInfo> platforms = new List<PlatformInfo>(numPlatforms + 1);
+        ChooseActionPoints(rand, p, startPlatform);
         platforms.Add(startPlatform);
-
-        for (int i = 0; i < numPlatforms; i++)
+        
+        float accumLevelTime = Vector2.Distance(startPlatform.GetStartPoint(), startPlatform.GetJumpPoint()) / p.runSpeed;
+        while (accumLevelTime < p.levelDuration)
         {
-            float progress = (float)i / numPlatforms;
+            float progress = accumLevelTime / p.levelDuration;
 
-            Vector2 prevPlatformEndpoint = platforms[platforms.Count - 1].GetEndPoint();
-            float spacing = Mathf.Lerp(minSpacing, maxSpacing, (float)rand.NextDouble());
-            float x = prevPlatformEndpoint.x + spacing;
+            PlatformInfo plat = PlaceNextPlatform(rand, p, platforms[platforms.Count - 1], progress);
+            ChooseActionPoints(rand, p, plat);
+            platforms.Add(plat);
 
-            float offsetY = Mathf.Lerp(minOffsetY, maxOffsetY, (float)rand.NextDouble());
-            float y = prevPlatformEndpoint.y + offsetY;
-            float tiltAngle = Mathf.Lerp(minTiltAngle, maxTiltAngle, (float)rand.NextDouble());
+            MovementFunc jf = SetupJumpFunction(p, platforms, platforms[platforms.Count - 2], platforms[platforms.Count - 1]);
 
-            float avgLength = Mathf.Lerp(startAvgLength, endAvgLength, progress);
-            float length = avgLength + Mathf.Lerp(-lengthVariation, lengthVariation, (float)rand.NextDouble());
-
-            Vector2 start = new Vector2(x, y);
-            Vector2 end = start + (Vector2)(Quaternion.Euler(0, 0, tiltAngle) * new Vector2(length, 0));
-            platforms.Add(PlatformInfo.FromEndpoints(start, end));
+            accumLevelTime += Vector2.Distance(plat.GetLandPoint(), plat.GetJumpPoint()) / p.runSpeed + jf.duration;
         }
 
-        for (int i = 0; i < platforms.Count; i++)
-        {
-            PlatformInfo p = platforms[i];
-
-            float earlyLandMargin = Mathf.Lerp(minEarlyLandMargin, maxEarlyLandMargin, (float)rand.NextDouble());
-            float lateJumpMargin = Mathf.Lerp(minLateJumpMargin, maxLateJumpMargin, (float)rand.NextDouble());
-            
-            p.landPoint = Vector2.Lerp(p.GetStartPoint(), p.GetEndPoint(), earlyLandMargin);
-            p.jumpPoint = Vector2.Lerp(p.GetStartPoint(), p.GetEndPoint(), 1 - lateJumpMargin);
-        }
-
-        for (int i = 0; i < platforms.Count - 1; i++)
-        {
-            Vector2 jumpStart = platforms[i].jumpPoint;
-            Vector2 jumpEnd = platforms[i + 1].landPoint;
-
-            float dx = jumpEnd.x - jumpStart.x;
-            float dy = jumpEnd.y - jumpStart.y;
-            float h = Mathf.Max(0, dy) + dx*jumpHeightRatio;
-            float jt = Vector2.Distance(jumpStart, jumpEnd) * jumpTimePerDistance;
-
-            float a = (dy - 2*(h + Mathf.Sqrt(h*(-dy + h))))/(jt*jt);
-            float b = (2*(h + Mathf.Sqrt(h*(-dy + h))))/jt;
-            float vx = dx/jt;
-            platforms[i].jumpFunction = new MovementFunc(t => new Vector2(vx*t, (a*t+b)*t), jt);
-        }
+        platforms[platforms.Count - 1].jumpFunction = new MovementFunc(_ => Vector2.zero, 0);
 
         return platforms;
+    }
+
+    private PlatformInfo PlaceNextPlatform(System.Random rand, LevelGeneratorParams p, PlatformInfo prevPlatform, float progress)
+    {
+        Vector2 prevPlatformEndpoint = prevPlatform.GetEndPoint();
+        float spacing = Mathf.Lerp(p.minSpacing, p.maxSpacing, (float)rand.NextDouble());
+        float x = prevPlatformEndpoint.x + spacing;
+
+        float offsetY = Mathf.Lerp(p.minOffsetY, p.maxOffsetY, (float)rand.NextDouble());
+        float y = prevPlatformEndpoint.y + offsetY;
+        float tiltAngle = Mathf.Lerp(p.minTiltAngle, p.maxTiltAngle, (float)rand.NextDouble());
+
+        float avgLength = Mathf.Lerp(p.startAvgLength, p.endAvgLength, progress);
+        float length = avgLength + Mathf.Lerp(-p.lengthVariation, p.lengthVariation, (float)rand.NextDouble());
+
+        Vector2 start = new Vector2(x, y);
+        Vector2 end = start + (Vector2)(Quaternion.Euler(0, 0, tiltAngle) * new Vector2(length, 0));
+        return PlatformInfo.FromEndpoints(start, end);
+    }
+
+    private void ChooseActionPoints(System.Random rand, LevelGeneratorParams p, PlatformInfo plat)
+    {
+        float earlyLandMargin = Mathf.Lerp(p.minEarlyLandMargin, p.maxEarlyLandMargin, (float)rand.NextDouble());
+        float lateJumpMargin = Mathf.Lerp(p.minLateJumpMargin, p.maxLateJumpMargin, (float)rand.NextDouble());
+
+        plat.landPoint = Vector2.Lerp(plat.GetStartPoint(), plat.GetEndPoint(), earlyLandMargin);
+        plat.jumpPoint = Vector2.Lerp(plat.GetStartPoint(), plat.GetEndPoint(), 1 - lateJumpMargin);
+    }
+
+    private MovementFunc GenerateJumpFunction(LevelGeneratorParams p, Vector2 jumpStart, Vector2 jumpEnd)
+    {
+        float dx = jumpEnd.x - jumpStart.x;
+        float dy = jumpEnd.y - jumpStart.y;
+        float h = Mathf.Max(0, dy) + dx * p.jumpHeightRatio;
+        float jt = Vector2.Distance(jumpStart, jumpEnd) * p.jumpTimePerDistance;
+
+        float a = (dy - 2 * (h + Mathf.Sqrt(h * (-dy + h)))) / (jt * jt);
+        float b = (2 * (h + Mathf.Sqrt(h * (-dy + h)))) / jt;
+        float vx = dx / jt;
+        return new MovementFunc(t => new Vector2(vx * t, (a * t + b) * t), jt);
+    }
+
+    private MovementFunc SetupJumpFunction(LevelGeneratorParams p, IList<PlatformInfo> platforms, PlatformInfo from, PlatformInfo to)
+    {
+        Vector2 jumpStart = from.jumpPoint;
+        Vector2 jumpEnd = to.landPoint;
+        MovementFunc jf = GenerateJumpFunction(p, jumpStart, jumpEnd);
+        from.jumpFunction = jf;
+        return jf;
     }
 
     public MovementFunc GenerateGuidePath(IList<PlatformInfo> platforms, float runSpeed)

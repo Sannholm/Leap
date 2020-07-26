@@ -5,10 +5,11 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float movementSpeed = 3f;
     public float onGroundMargin = 0.2f;
     public LayerMask groundLayerMask;
     public RunningCharacterController character;
+
+    public event Action<Platform> Landed;
 
     public AudioSource jumpAudioSource;
     public RandomAudioClipScheduler landAudioPlayer;
@@ -16,18 +17,31 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private CapsuleCollider coll;
 
+    private bool movementStopped = false;
+    private float movementSpeed = 0;
+
     private MovementFunc? currMovementFunction;
     private float movementFunctionTime;
     private Vector2 movementFunctionStartPos;
 
     private ISet<Platform> visitedPlatforms = new HashSet<Platform>();
 
-    private bool hasFailed = false;
-
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         coll = GetComponent<CapsuleCollider>();
+    }
+
+    public void Run(float speed)
+    {
+        movementSpeed = speed;
+    }
+
+    public void Fall()
+    {
+        Debug.Log("Falling");
+        
+        movementStopped = true;
     }
 
     void OnJump()
@@ -44,7 +58,7 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!hasFailed)
+        if (!movementStopped)
         {
             if (!currMovementFunction.HasValue)
             {
@@ -58,6 +72,40 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = (f(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
                 movementFunctionTime += Time.fixedDeltaTime;
             }
+        }
+    }
+
+    void OnTriggerStay(Collider collider)
+    {
+        Platform platform = collider.gameObject.GetComponentInParent<Platform>();
+        if (platform != null && rb.velocity.y <= 0 && platform.IsAbovePlatform(coll.bounds.min.y) && !visitedPlatforms.Contains(platform))
+        {
+            visitedPlatforms.Add(platform);
+            platform.Activate();
+            Debug.Log("Arrive above platform");
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Coll");
+
+        StopMovementFunction();
+
+        Platform platform = GetOnPlatform();
+        if (platform == null)
+        {
+            movementStopped = true;
+            Debug.Log("Fail");
+        }
+        else
+        {
+            if (Landed != null)
+            {
+                Landed.Invoke(platform);
+            }
+            landAudioPlayer.PlayNext();
+            Debug.Log("Land");
         }
     }
 
@@ -88,33 +136,5 @@ public class PlayerController : MonoBehaviour
             }
         }
         return foundPlatform;
-    }
-
-    void OnTriggerStay(Collider collider)
-    {
-        Platform platform = collider.gameObject.GetComponentInParent<Platform>();
-        if (platform != null && rb.velocity.y <= 0 && platform.isAbovePlatform(coll.bounds.min.y) && !visitedPlatforms.Contains(platform)) {
-            visitedPlatforms.Add(platform);
-            platform.Activate();
-            Debug.Log("Arrive at platform");
-        }
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log("Coll");
-
-        StopMovementFunction();
-
-        if (GetOnPlatform() == null)
-        {
-            hasFailed = true;
-            Debug.Log("Failed");
-        }
-        else
-        {
-            landAudioPlayer.PlayNext();
-            Debug.Log("Land");
-        }
     }
 }

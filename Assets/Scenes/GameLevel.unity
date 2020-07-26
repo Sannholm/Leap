@@ -327,18 +327,32 @@ MonoBehaviour:
   generatedLevelRoot: {fileID: 961136590}
   platformPrefab: {fileID: 3651745500464100675, guid: dc1d1d8b3fd0b5742879947b76e93f21,
     type: 3}
-  player: {fileID: 315637763}
-  guideCharacter: {fileID: 1224296411}
+  playerController: {fileID: 315637764}
+  guideController: {fileID: 1224296414}
   allPlatformsOn: 0
+  levelDuration: 60
   startPlatformLength: 20
   playerStartDelay: 1
   guideRunSpeed: 6.9
+  playerRunSpeed: 7
 --- !u!1 &315637763 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7397550379769240229, guid: 2973a0da688e76d4ca606b5bfde6a3fa,
     type: 3}
   m_PrefabInstance: {fileID: 1397938796}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &315637764 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7437449123760212144, guid: 2973a0da688e76d4ca606b5bfde6a3fa,
+    type: 3}
+  m_PrefabInstance: {fileID: 1397938796}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315637763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 578e164bccde8e9419cfee11e9234aa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &315637769 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7397550379769240234, guid: 2973a0da688e76d4ca606b5bfde6a3fa,
@@ -585,6 +599,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 9055113747904733541}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1224296414 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7207594461347675263, guid: 9faf20bd0c3dbd14b8f8dceb131fff8f,
+    type: 3}
+  m_PrefabInstance: {fileID: 9055113747904733541}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1224296411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84ba78d6cc043074097f14ee6163b6b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1388139089
 GameObject:
   m_ObjectHideFlags: 0

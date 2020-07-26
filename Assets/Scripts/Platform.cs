@@ -98,9 +98,14 @@ public class Platform : MonoBehaviour
         }
     }
 
-    public bool isAbovePlatform(float y)
+    public bool IsAbovePlatform(float y)
     {
         return coll.bounds.min.y <= y;
+    }
+
+    public Vector2 GetClosestPointTo(Vector2 point)
+    {
+        return coll.bounds.ClosestPoint(point);
     }
 
     public MovementFunc GetJumpFunction()
