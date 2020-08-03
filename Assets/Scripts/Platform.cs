@@ -88,7 +88,15 @@ public class Platform : MonoBehaviour
         lightBeam.GetComponent<MeshFilter>().mesh.vertices = lightBeamVertices;
     }
 
-    public void Activate()
+    void OnTriggerStay(Collider collider)
+    {
+        if (activationTime == -1)
+        {
+            Activate();
+        }
+    }
+
+    private void Activate()
     {
         if (!alwaysOn)
         {
@@ -96,16 +104,6 @@ public class Platform : MonoBehaviour
             activationTime = 0;
             turnOnAudioSource.Play();
         }
-    }
-
-    public bool IsAbovePlatform(float y)
-    {
-        return coll.bounds.min.y <= y;
-    }
-
-    public Vector2 GetClosestPointTo(Vector2 point)
-    {
-        return coll.bounds.ClosestPoint(point);
     }
 
     public MovementFunc GetJumpFunction()

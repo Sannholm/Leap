@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+[Serializable]
 public class LevelGeneratorParams
 {
     public float levelDuration;

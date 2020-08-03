@@ -1,5 +1,5 @@
 {
-    "name": "Leap",
+    "name": "InputActions",
     "maps": [
         {
             "name": "Player",
@@ -34,7 +34,7 @@
             "actions": [
                 {
                     "name": "Navigate",
-                    "type": "Value",
+                    "type": "PassThrough",
                     "id": "820594d2-717f-4ba8-a92a-2ba7380a0f1b",
                     "expectedControlType": "Vector2",
                     "processors": "",
@@ -42,7 +42,7 @@
                 },
                 {
                     "name": "Submit",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "7f2f5e2d-3989-4a50-ac15-a713673fee84",
                     "expectedControlType": "Button",
                     "processors": "",
@@ -50,7 +50,7 @@
                 },
                 {
                     "name": "Cancel",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "7a328f57-ed69-4fba-af1b-103224ea8b08",
                     "expectedControlType": "Button",
                     "processors": "",

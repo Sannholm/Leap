@@ -24,15 +24,13 @@ public class PlayerController : MonoBehaviour
     private float movementFunctionTime;
     private Vector2 movementFunctionStartPos;
 
-    private ISet<Platform> visitedPlatforms = new HashSet<Platform>();
-
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         coll = GetComponent<CapsuleCollider>();
     }
 
-    public void Run(float speed)
+    public void SetSpeed(float speed)
     {
         movementSpeed = speed;
     }
@@ -72,17 +70,6 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = (f(movementFunctionTime + Time.fixedDeltaTime) - offset) / Time.fixedDeltaTime;
                 movementFunctionTime += Time.fixedDeltaTime;
             }
-        }
-    }
-
-    void OnTriggerStay(Collider collider)
-    {
-        Platform platform = collider.gameObject.GetComponentInParent<Platform>();
-        if (platform != null && rb.velocity.y <= 0 && platform.IsAbovePlatform(coll.bounds.min.y) && !visitedPlatforms.Contains(platform))
-        {
-            visitedPlatforms.Add(platform);
-            platform.Activate();
-            Debug.Log("Arrive above platform");
         }
     }
 

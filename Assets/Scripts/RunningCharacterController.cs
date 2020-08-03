@@ -15,7 +15,7 @@ public class RunningCharacterController : MonoBehaviour
 
     void Update()
     {
-        float velX = (transform.position.x - prevPosX) / Time.deltaTime;
+        float velX = Time.deltaTime != 0 ? (transform.position.x - prevPosX) / Time.deltaTime : 0;
         animator.SetFloat("RunSpeed", velX);
 
         prevPosX = transform.position.x;
@@ -24,6 +24,6 @@ public class RunningCharacterController : MonoBehaviour
     public void Jump(float duration)
     {
         animator.SetTrigger("Jump");
-        animator.SetFloat("JumpSpeedMul", 1/duration);
+        animator.SetFloat("JumpSpeedMul", 1 / duration);
     }
 }
