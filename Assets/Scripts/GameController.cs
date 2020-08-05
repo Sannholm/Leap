@@ -53,6 +53,7 @@ public class GameController : MonoBehaviour
     {
         levelGenParams.runSpeed = playerRunSpeed;
 
+        Time.timeScale = 1;
         ConstructLevel();
         guideController.Follow(guidePath, 0);
 
