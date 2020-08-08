@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour
     public float startPlatformLength = 20;
     public float playerStartDelay = 2;
     public float playerRunSpeed = 7f;
+    public float goodJumpThreshold = 0.5f;
 
     public LevelGeneratorParams levelGenParams = new LevelGeneratorParams
     {
@@ -51,6 +52,8 @@ public class GameController : MonoBehaviour
 
     private GameState state = GameState.PLAYING;
 
+    private float accuracy = 0;
+
     void Start()
     {
         level = Persistence.LoadScoreboard().completedLevels.Select(l => l.level).DefaultIfEmpty(0).Max() + 1;
@@ -61,6 +64,7 @@ public class GameController : MonoBehaviour
         ConstructLevel();
         guideController.Follow(guidePath, 0);
 
+        playerController.Jumped += OnPlayerJump;
         playerController.Landed += OnPlayerLand;
         StartCoroutine(StartPlayerRun(playerStartDelay));
     }
@@ -119,6 +123,20 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private void OnPlayerJump(Platform platform)
+    {
+        Assert.IsTrue(platforms.Count > 1);
+
+        float dist = Mathf.Abs(playerController.gameObject.transform.position.x - platform.transform.parent.TransformPoint(platform.GetJumpPoint()).x);
+        if (dist <= goodJumpThreshold)
+        {
+            accuracy += 1f / (platforms.Count - 1);
+            Debug.Log("Good jump!");
+            Debug.Log("Total jump accuracy: " + accuracy*100 + " %");
+        }
+
+    }
+
     private void OnPlayerLand(Platform platform)
     {
         bool isLastPlatform = platforms[platforms.Count - 1] == platform;
@@ -167,7 +185,7 @@ public class GameController : MonoBehaviour
             scoreboard.completedLevels.Add(new CompletedLevel
             {
                 level = level,
-                accuracy = 0.5f, // TODO
+                accuracy = accuracy,
                 date = DateTime.UtcNow
             });
             Persistence.SaveScoreboard(scoreboard);

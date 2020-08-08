@@ -25,10 +25,10 @@ public class Platform : MonoBehaviour
             Vector3 end = gameObject.transform.parent.TransformPoint(platform.GetEndPoint());
             Vector3 land = gameObject.transform.parent.TransformPoint(platform.GetLandPoint());
             Vector3 jump = gameObject.transform.parent.TransformPoint(platform.GetJumpPoint());
-            Gizmos.DrawLine(land, land + Vector3.up * 2);
-            Gizmos.DrawLine(jump, jump + Vector3.up * 2);
             Gizmos.DrawWireSphere(start, 0.1f);
             Gizmos.DrawWireSphere(end, 0.1f);
+            Gizmos.DrawLine(land, land + Vector3.up * 2);
+            Gizmos.DrawLine(jump, jump + Vector3.up * 2);
         }
     }
 
@@ -109,5 +109,10 @@ public class Platform : MonoBehaviour
     public MovementFunc GetJumpFunction()
     {
         return platform.GetJumpFunction();
+    }
+
+    public Vector2 GetJumpPoint()
+    {
+        return platform.GetJumpPoint();
     }
 }

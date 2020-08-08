@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayerMask;
     public RunningCharacterController character;
 
+    public event Action<Platform> Jumped;
     public event Action<Platform> Landed;
 
     public AudioSource jumpAudioSource;
@@ -51,6 +52,7 @@ public class PlayerController : MonoBehaviour
             StartMovementFunction(jf);
             character.Jump(jf.duration);
             jumpAudioSource.Play();
+            Jumped.Invoke(platform);
         }
     }
 
