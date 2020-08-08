@@ -44,6 +44,8 @@ public class GameController : MonoBehaviour
 
     public event Action<GameState> GameStateChanged;
 
+    private int level;
+
     private IList<Platform> platforms;
     private MovementFunc guidePath;
 
@@ -51,6 +53,8 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        level = Persistence.LoadScoreboard().completedLevels.Select(l => l.level).DefaultIfEmpty(0).Max() + 1;
+
         levelGenParams.runSpeed = playerRunSpeed;
 
         Time.timeScale = 1;
@@ -158,6 +162,16 @@ public class GameController : MonoBehaviour
             Debug.Log("Win! " + (Time.timeSinceLevelLoad - playerStartDelay));
 
             playerController.SetSpeed(0);
+
+            var scoreboard = Persistence.LoadScoreboard();
+            scoreboard.completedLevels.Add(new CompletedLevel
+            {
+                level = level,
+                accuracy = 0.5f, // TODO
+                date = DateTime.UtcNow
+            });
+            Persistence.SaveScoreboard(scoreboard);
+
             SetGameState(GameState.WON);
         }
         else
@@ -165,6 +179,7 @@ public class GameController : MonoBehaviour
             Debug.Log("Game over " + (Time.timeSinceLevelLoad - playerStartDelay));
 
             playerController.Fall();
+            
             SetGameState(GameState.LOST);
         }
     }

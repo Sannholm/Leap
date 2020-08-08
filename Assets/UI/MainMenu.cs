@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -16,11 +18,16 @@ public class MainMenu : MonoBehaviour
     public GameObject play;
     public GameObject settings;
     public GameObject scoreboard;
+    public GameObject scoreboardBtn;
 
     private State state;
 
     void Start()
     {
+        int nextLevel = Persistence.LoadScoreboard().completedLevels.Select(l => l.level).DefaultIfEmpty(0).Max() + 1;
+        play.GetComponent<TMP_Text>().SetText("Press SPACE to play level {0}", nextLevel);
+        scoreboardBtn.SetActive(nextLevel > 1);
+
         SetState(State.PLAY);
     }
 
