@@ -20,4 +20,7 @@ MonoBehaviour:
     scenePath: Assets/Scenes/GameLevel.unity
   platformPrefab: {fileID: 3651745500464100675, guid: dc1d1d8b3fd0b5742879947b76e93f21,
     type: 3}
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
   mixer: {fileID: 24100000, guid: 87064d9ffde507f4eb758256f2a4dc5d, type: 2}

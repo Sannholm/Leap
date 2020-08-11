@@ -13,12 +13,17 @@ enum State
 
 public class MainMenu : MonoBehaviour
 {
-    public GameConfig gameConfig;
+    [SerializeField]
+    private GameConfig gameConfig;
 
-    public GameObject play;
-    public GameObject settings;
-    public GameObject scoreboard;
-    public GameObject scoreboardBtn;
+    [SerializeField]
+    private GameObject play;
+    [SerializeField]
+    private GameObject settings;
+    [SerializeField]
+    private GameObject scoreboard;
+    [SerializeField]
+    private GameObject scoreboardBtn;
 
     private State state;
 

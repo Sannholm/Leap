@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
+[Serializable]
+public class PlatformEvent : UnityEvent<Platform> {}
+
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    public float onGroundMargin = 0.2f;
-    public LayerMask groundLayerMask;
-    public RunningCharacterController character;
+    [SerializeField]
+    private GameConfig gameConfig;
 
-    public event Action<Platform> Jumped;
-    public event Action<Platform> Landed;
+    [SerializeField]
+    private float onGroundMargin = 0.2f;
+    [SerializeField]
+    private RunningCharacterController character;
 
-    public AudioSource jumpAudioSource;
-    public RandomAudioClipScheduler landAudioPlayer;
+    public PlatformEvent Jumped;
+    public PlatformEvent Landed;
 
     private Rigidbody rb;
     private CapsuleCollider coll;
@@ -51,7 +57,6 @@ public class PlayerController : MonoBehaviour
             MovementFunc jf = platform.GetJumpFunction();
             StartMovementFunction(jf);
             character.Jump(jf.duration);
-            jumpAudioSource.Play();
             Jumped.Invoke(platform);
         }
     }
@@ -93,7 +98,6 @@ public class PlayerController : MonoBehaviour
             {
                 Landed.Invoke(platform);
             }
-            landAudioPlayer.PlayNext();
             Debug.Log("Land");
         }
     }
@@ -113,7 +117,7 @@ public class PlayerController : MonoBehaviour
     private Platform GetOnPlatform()
     {
         Vector3 center = coll.bounds.center + Vector3.down * (coll.height/2 - coll.radius + onGroundMargin);
-        Collider[] colliders = Physics.OverlapBox(center, Vector3.one*coll.radius, Quaternion.identity, groundLayerMask, QueryTriggerInteraction.Ignore);
+        Collider[] colliders = Physics.OverlapBox(center, Vector3.one*coll.radius, Quaternion.identity, gameConfig.groundLayerMask, QueryTriggerInteraction.Ignore);
         Platform foundPlatform = null;
         foreach (var collider in colliders)
         {

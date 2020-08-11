@@ -10,6 +10,7 @@ public class GameConfig : ScriptableObject
     public SceneReference gameLevelScene;
     
     public GameObject platformPrefab;
+    public LayerMask groundLayerMask;
 
     public AudioMixer mixer;
 }

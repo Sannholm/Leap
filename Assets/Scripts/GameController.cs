@@ -14,19 +14,29 @@ public enum GameState
 
 public class GameController : MonoBehaviour
 {
-    public GameConfig gameConfig;
+    [SerializeField]
+    private GameConfig gameConfig;
 
-    public GameObject generatedLevelRoot;
-    public PlayerController playerController;
-    public GuideController guideController;
+    [SerializeField]
+    private GameObject generatedLevelRoot;
+    [SerializeField]
+    private PlayerController playerController;
+    [SerializeField]
+    private GuideController guideController;
 
-    public bool allPlatformsOn = false;
-    public float startPlatformLength = 20;
-    public float playerStartDelay = 2;
-    public float playerRunSpeed = 7f;
-    public float goodJumpThreshold = 0.5f;
+    [SerializeField]
+    private bool allPlatformsOn = false;
+    [SerializeField]
+    private float startPlatformLength = 20;
+    [SerializeField]
+    private float playerStartDelay = 2;
+    [SerializeField]
+    private float playerRunSpeed = 7f;
+    [SerializeField]
+    private float goodJumpThreshold = 0.5f;
 
-    public LevelGeneratorParams levelGenParams = new LevelGeneratorParams
+    [SerializeField]
+    private LevelGeneratorParams levelGenParams = new LevelGeneratorParams
     {
         levelDuration = 60,
 
@@ -43,48 +53,52 @@ public class GameController : MonoBehaviour
         jumpTimePerDistance = 0.1f,
     };
 
-    public event Action<GameState> GameStateChanged;
 
     private int level;
-
-    private IList<Platform> platforms;
-    private MovementFunc guidePath;
-
     private GameState state = GameState.PLAYING;
-
+    public event Action<GameState> GameStateChanged;
+    private IList<Platform> platforms;
     private float accuracy = 0;
 
     void Start()
     {
-        level = Persistence.LoadScoreboard().completedLevels.Select(l => l.level).DefaultIfEmpty(0).Max() + 1;
+        Time.timeScale = 1;
 
+        level = Persistence.LoadScoreboard().completedLevels.Select(l => l.level).DefaultIfEmpty(0).Max() + 1;
         levelGenParams.runSpeed = playerRunSpeed;
 
-        Time.timeScale = 1;
-        ConstructLevel();
+        // Setup guide character
+        MovementFunc guidePath;
+        (platforms, guidePath) = ConstructLevel(levelGenParams);
         guideController.Follow(guidePath, 0);
 
-        playerController.Jumped += OnPlayerJump;
-        playerController.Landed += OnPlayerLand;
+        // Setup player
+        playerController.Jumped.AddListener(OnPlayerJump);
+        playerController.Landed.AddListener(OnPlayerLand);
         StartCoroutine(StartPlayerRun(playerStartDelay));
     }
 
-    private void ConstructLevel()
+    private (IList<Platform> platforms, MovementFunc guidePath) ConstructLevel(LevelGeneratorParams levelGenParams)
     {
         LevelGenerator levelGen = new LevelGenerator();
+
+        // Generate platforms
         IList<PlatformInfo> platformInfos = levelGen.GeneratePlatforms(new System.Random(), PlatformInfo.FromLength(Vector2.zero, startPlatformLength), levelGenParams);
+        IList<Platform> platforms = new List<Platform>(platformInfos.Count);
+        PlacePlatforms(platforms, platformInfos);
         
-        float jumpDuration = platformInfos.Select(p => p.GetJumpFunction().duration).Sum();
+        // Generate guide path
+        float jumpDuration = platformInfos.Sum(p => p.GetJumpFunction().duration);
         float runDuration = levelGenParams.levelDuration - jumpDuration;
-        float runDistance = platformInfos.Select(p => Vector3.Distance(p.GetLandPoint(), p.GetJumpPoint())).Sum();
+        float runDistance = platformInfos.Sum(p => Vector3.Distance(p.GetLandPoint(), p.GetJumpPoint()));
         float guideRunSpeed = runDistance / runDuration;
-        guidePath = levelGen.GenerateGuidePath(platformInfos, guideRunSpeed);
-        PlacePlatforms(platformInfos);
+        MovementFunc guidePath = levelGen.GenerateGuidePath(platformInfos, guideRunSpeed);
+
+        return (platforms, guidePath);
     }
 
-    private void PlacePlatforms(IList<PlatformInfo> platformInfos)
+    private void PlacePlatforms(IList<Platform> platforms, IList<PlatformInfo> platformInfos)
     {
-        platforms = new List<Platform>(platformInfos.Count);
         for (int i = 0; i < platformInfos.Count; i++)
         {
             Platform platform = Instantiate(gameConfig.platformPrefab, generatedLevelRoot.transform, false).GetComponent<Platform>();
@@ -134,7 +148,6 @@ public class GameController : MonoBehaviour
             Debug.Log("Good jump!");
             Debug.Log("Total jump accuracy: " + accuracy*100 + " %");
         }
-
     }
 
     private void OnPlayerLand(Platform platform)

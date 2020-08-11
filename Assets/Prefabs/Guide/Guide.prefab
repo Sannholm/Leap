@@ -45,10 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84ba78d6cc043074097f14ee6163b6b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameConfig: {fileID: 11400000, guid: 018f7e0715b12a445958d4e7e6798326, type: 2}
   onGroundMargin: 0.1
-  groundLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
   character: {fileID: 1063846623598258923}
 --- !u!114 &1646265495522675192
 MonoBehaviour:

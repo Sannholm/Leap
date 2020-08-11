@@ -5,11 +5,15 @@ using UnityEngine.Audio;
 
 public class SettingsPanel : MonoBehaviour
 {
-    public GameConfig gameConfig;
+    [SerializeField]
+    private GameConfig gameConfig;
 
-    public SliderSetting masterVolume;
-    public SliderSetting musicVolume;
-    public SliderSetting sfxVolume;
+    [SerializeField]
+    private SliderSetting masterVolume;
+    [SerializeField]
+    private SliderSetting musicVolume;
+    [SerializeField]
+    private SliderSetting sfxVolume;
 
     void Start()
     {

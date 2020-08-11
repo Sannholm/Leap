@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class SliderSetting : MonoBehaviour
 {
-    public Slider slider;
+    [SerializeField]
+    private Slider slider;
 
     public float GetValue()
     {

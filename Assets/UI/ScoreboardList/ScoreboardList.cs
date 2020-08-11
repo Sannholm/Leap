@@ -7,7 +7,8 @@ using TMPro;
 
 public class ScoreboardList : MonoBehaviour
 {
-    public GameObject rowPrefab;
+    [SerializeField]
+    private GameObject rowPrefab;
 
     void Start()
     {
@@ -17,7 +18,7 @@ public class ScoreboardList : MonoBehaviour
         }
     }
 
-    public void AddRow(int level, float accuracy, DateTime date)
+    private void AddRow(int level, float accuracy, DateTime date)
     {
         var row = Instantiate(rowPrefab);
         row.transform.SetParent(gameObject.transform, false);

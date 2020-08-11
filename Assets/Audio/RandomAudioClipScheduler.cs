@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class RandomAudioClipScheduler : MonoBehaviour
 {
-    public AudioSource audioSource;
-    public AudioClip[] clips;
-    public bool fairScheduling = true;
+    [SerializeField]
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip[] clips;
+    [SerializeField]
+    private bool fairScheduling = true;
 
     private int numUsedClips = 0;
 

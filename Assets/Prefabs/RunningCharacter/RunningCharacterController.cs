@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class RunningCharacterController : MonoBehaviour
 {
-    public Animator animator;
+    [SerializeField]
+    private Animator animator;
 
     private float prevPosX;
 

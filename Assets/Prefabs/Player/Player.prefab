@@ -328,13 +328,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 578e164bccde8e9419cfee11e9234aa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameConfig: {fileID: 11400000, guid: 018f7e0715b12a445958d4e7e6798326, type: 2}
   onGroundMargin: 0.2
-  groundLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
   character: {fileID: 714663944379176973}
-  jumpAudioSource: {fileID: 4124911489375338496}
-  landAudioPlayer: {fileID: 7298123851592370219}
+  Jumped:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4124911489375338496}
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  Landed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 7298123851592370219}
+        m_MethodName: PlayNext
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7412678635052860223
 GameObject:
   m_ObjectHideFlags: 0

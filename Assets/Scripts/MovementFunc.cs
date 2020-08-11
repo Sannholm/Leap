@@ -31,7 +31,7 @@ public struct MovementFunc
             return fs[fs.Count - 1].f(t - accumTime);
         };
 
-        float totalTime = fs.Select(mf => mf.duration).Sum();
+        float totalTime = fs.Sum(mf => mf.duration);
 
         return new MovementFunc(combinedFunc, totalTime);
     }

@@ -6,10 +6,14 @@ using UnityEngine.InputSystem;
 
 public class InGameUIController : MonoBehaviour
 {
-    public GameController gameController;
-    public GameObject pauseMenu;
-    public GameObject loseMenu;
-    public GameObject winMenu;
+    [SerializeField]
+    private GameController gameController;
+    [SerializeField]
+    private GameObject pauseMenu;
+    [SerializeField]
+    private GameObject loseMenu;
+    [SerializeField]
+    private GameObject winMenu;
 
     void Start()
     {

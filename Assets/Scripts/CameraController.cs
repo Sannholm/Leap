@@ -4,13 +4,20 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Camera mainCamera;
-    public RenderTexture lightMaskRT;
-    public GameObject followedPlayer;
-    public GameObject guidePlayer;
-    public Vector3 offset;
-    public float minPosX = 0;
-    public float smoothTime;
+    [SerializeField]
+    private Camera mainCamera;
+    [SerializeField]
+    private RenderTexture lightMaskRT;
+    [SerializeField]
+    private GameObject followedPlayer;
+    [SerializeField]
+    private GameObject guidePlayer;
+    [SerializeField]
+    private Vector3 offset;
+    [SerializeField]
+    private float minPosX = 0;
+    [SerializeField]
+    private float smoothTime;
     
     private Vector3 followVelocity;
 

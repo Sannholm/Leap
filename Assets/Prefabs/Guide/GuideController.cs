@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class GuideController : MonoBehaviour
 {
-    public float onGroundMargin = 0.1f;
-    public LayerMask groundLayerMask;
-    public RunningCharacterController character;
+    [SerializeField]
+    private GameConfig gameConfig;
+    [SerializeField]
+    private float onGroundMargin = 0.1f;
+    [SerializeField]
+    private RunningCharacterController character;
 
     private FollowPath followPath;
 
@@ -40,7 +43,7 @@ public class GuideController : MonoBehaviour
     {
         float radius = 0.5f;
         Vector3 center = transform.position + Vector3.down * (-radius + onGroundMargin);
-        Collider[] colliders = Physics.OverlapBox(center, Vector3.one*radius, Quaternion.identity, groundLayerMask, QueryTriggerInteraction.Ignore);
+        Collider[] colliders = Physics.OverlapBox(center, Vector3.one*radius, Quaternion.identity, gameConfig.groundLayerMask, QueryTriggerInteraction.Ignore);
         Platform foundPlatform = null;
         foreach (var collider in colliders)
         {
