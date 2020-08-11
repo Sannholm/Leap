@@ -66,6 +66,7 @@ public class GameController : MonoBehaviour
 
         level = Persistence.LoadScoreboard().completedLevels.Select(l => l.level).DefaultIfEmpty(0).Max() + 1;
         levelGenParams.runSpeed = playerRunSpeed;
+        levelGenParams.levelDuration *= level;
 
         // Setup guide character
         MovementFunc guidePath;

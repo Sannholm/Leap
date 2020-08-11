@@ -334,7 +334,7 @@ MonoBehaviour:
   playerRunSpeed: 7
   goodJumpThreshold: 0.5
   levelGenParams:
-    levelDuration: 120
+    levelDuration: 60
     runSpeed: 0
     startAvgLength: 7
     endAvgLength: 3
